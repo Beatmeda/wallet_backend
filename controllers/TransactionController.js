@@ -20,7 +20,8 @@ module.exports = {
                     let body = {
                         user_id: data.message.user_id,
                         value: req.value,
-                        type: req.type
+                        type: req.type,
+                        enabled: 1
                     }
                     database.create('transactions', body,  function (response_transaction)  {
                         if(response_transaction.status == 200){
@@ -38,14 +39,14 @@ module.exports = {
                 }else {
                     return callback({
                         'message': data.message,
-                        'status': 200
+                        'status': 422
                     });
                 }
             });
         } else {
             return callback({
                 'message': result.errors.errors,
-                'status': 200
+                'status': 422
             });
         }
     },
@@ -65,12 +66,19 @@ module.exports = {
                         if(req.value > response_validate_balance.message) {
                             return callback({
                                 'message': "La billetera no tiene saldo suficiente para hacer la compra.",
-                                'status': 200
+                                'status': 422
                             });
                         }else {
                             let token = Math.random().toString(24).slice(8);//Se genera un token aleatorio con 6 digitos
-                            utils.update_user_token(data.message.user_id,token, async function (response_update_user_token) {
-                                if(response_update_user_token.status == 200) {
+                            let body = {
+                                user_id: data.message.user_id,
+                                value: req.value * -1,
+                                type: req.type,
+                                enabled: 0,
+                                token: token
+                            }
+                            database.create('transactions', body,  async function (response_transaction)  {
+                                if(response_transaction.status == 200){
                                     let templatesDir = path.resolve(__dirname, '../utils/templates');
                                     const result =  await email.transporter();
                                     let template = new EmailTemplate(path.join(templatesDir, 'email_confirmation_purchase'));
@@ -78,7 +86,7 @@ module.exports = {
                                         "from": process.env['USER_EMAIL'],
                                         "to": data.message.email,
                                         "subject": 'Confirmación de compra: Correo de prueba',
-                                        "token": token + "" + data.message.user_id,//el token enviado al correo es el token de seis digitos aleatorio y se le añade un digo que es el user_id
+                                        "token": token + "-" + data.message.user_id,//el token enviado al correo es el token de seis digitos aleatorio y se le añade un digo que es el user_id
                                         "url": process.env['URL']
                                     }
 
@@ -106,8 +114,8 @@ module.exports = {
                                     });
                                 }else {
                                     return callback({
-                                        'message': "No fue posible generar el token requerido para envíos de email. Inténtalo más tarde.",
-                                        'status': 200
+                                        'message': response_transaction.message,
+                                        'status': response_transaction.status
                                     });
                                 }
                             });
@@ -117,22 +125,25 @@ module.exports = {
                 }else {
                     return callback({
                         'message': data.message,
-                        'status': 200
+                        'status': 422
                     });
                 }
             });
         } else {
             return callback({
                 'message': result.errors.errors,
-                'status': 200
+                'status': 422
             });
         }
     },
     confirmationPurchase: function (req, callback) {
-        return callback({
-            'message': req.token,
-            'status': 200
-        });
+        let token = req.params.token.split("-");
+        utils.validate_token_confirmation(token[1],token[0], function (response_validate_token_confirmation) {
+            return callback({
+                'message': response_validate_token_confirmation.message,
+                'status': response_validate_token_confirmation.status
+            });
+        })
     },
     getBalance: function (req, callback) {
         let rules = {
@@ -153,21 +164,21 @@ module.exports = {
                         }else {
                             return callback({
                                 'message': "En este momento no se puede consultar el saldo.",
-                                'status': 200
+                                'status': 422
                             });
                         }
                     });
                 }else {
                     return callback({
                         'message': data.message,
-                        'status': 200
+                        'status': 422
                     });
                 }
             });
         } else {
             return callback({
                 'message': result.errors.errors,
-                'status': 200
+                'status': 422
             });
         }
     }

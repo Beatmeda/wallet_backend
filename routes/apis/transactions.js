@@ -2,7 +2,7 @@ const API_BASE = "/apis/transactions";
 const transactions_controller = require("../../controllers/TransactionController");
 
 module.exports = function(app) {
-    app.patch(`${API_BASE}/chargeMoney`, (req, res) => {
+    app.post(`${API_BASE}/chargeMoney`, (req, res) => {
         transactions_controller.chargeMoney(req.body, function(data) {
             res.json(data);
         });
@@ -17,9 +17,9 @@ module.exports = function(app) {
             res.json(data);
         });
     });
-    /*app.get(`${API_BASE}/confirmation_purchase/:token`, (req, res) => {
+    app.get(`${API_BASE}/confirmation_purchase/:token`, (req, res) => {
         transactions_controller.confirmationPurchase(req, function(data) {
             res.json(data);
         });
-    });*/
+    });
 };

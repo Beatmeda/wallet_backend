@@ -5,7 +5,7 @@ const register_controller = require("../../controllers/RegisterController");
 module.exports = function(app) {
     app.post(`${API_BASE}`, (req, res) => {
         register_controller.register(req.body, function(data) {
-            res.status(data.status).json(data);
+            res.json(data);
         });
     });
 };

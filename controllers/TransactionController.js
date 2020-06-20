@@ -139,10 +139,29 @@ module.exports = {
     confirmationPurchase: function (req, callback) {
         let token = req.params.token.split("-");
         utils.validate_token_confirmation(token[1],token[0], function (response_validate_token_confirmation) {
-            return callback({
-                'message': response_validate_token_confirmation.message,
-                'status': response_validate_token_confirmation.status
-            });
+            if(response_validate_token_confirmation.status == 200) {
+                //se valida el balance en dos partes: Aqui es la segunda parte, y se hace para que no descuente dinero si el usuario ya no tiene fondos una vez consumido el api de confirmacion de compra.
+                utils.validate_balance(token[1],function (response_validate_balance) {
+                    if(Math.abs(response_validate_token_confirmation.message) > response_validate_balance.message) {
+                        return callback({
+                            'message': "La billetera no tiene saldo suficiente para hacer la compra.",
+                            'status': 422
+                        });
+                    }else {
+                        utils.update_transaction_enabled(token[0],function (response_update_transaction_enabled) {
+                            return callback({
+                                'message': response_update_transaction_enabled.message,
+                                'status': response_update_transaction_enabled.status
+                            });
+                        });
+                    }
+                });
+            }else {
+                return callback({
+                    'message': response_validate_token_confirmation.message,
+                    'status': response_validate_token_confirmation.status
+                });
+            }
         })
     },
     getBalance: function (req, callback) {

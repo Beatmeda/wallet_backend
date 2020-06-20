@@ -39,24 +39,30 @@ module.exports = {
                         'status': 422,
                     });
                 }else {
-                    database.query(`UPDATE transactions SET enabled = '1' WHERE id = '${response.message[0].id}'`, function (response_update_enabled) {
-                        if(response_update_enabled.status == 200) {
-                            return callback({
-                                'message': "Su compra ha sido aprobada.",
-                                'status': 200,
-                            });
-                        }else {
-                            return callback({
-                                'message': "No fue posible descontar el dinero de la billetera.",
-                                'status': 422,
-                            });
-                        }
+                    return callback({
+                        'message': response.message[0].value,
+                        'status': 200
                     });
                 }
             }else{
                 return callback({
-                    'message': response.message,
-                    'status': response.status
+                    'message': "No existe una compra por aprobar con el token enviado.",
+                    'status': 422
+                });
+            }
+        });
+    },
+    update_transaction_enabled: function (token, callback) {
+        database.query(`UPDATE transactions SET enabled = '1' WHERE token = '${token}'`, function (response_update_enabled) {
+            if(response_update_enabled.status == 200) {
+                return callback({
+                    'message': "Su compra ha sido aprobada.",
+                    'status': 200,
+                });
+            }else {
+                return callback({
+                    'message': "No fue posible descontar el dinero de la billetera.",
+                    'status': 422,
                 });
             }
         });

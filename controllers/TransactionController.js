@@ -133,5 +133,42 @@ module.exports = {
             'message': req.token,
             'status': 200
         });
+    },
+    getBalance: function (req, callback) {
+        let rules = {
+            document: 'required',
+            phone: 'required',
+        }
+        let result = new validator(req, rules);
+        if (result.passes()) {
+            utils.validate_user(req,function(data) {
+                if(data.status == 200) {
+                    //se valida el balance en dos partes: Aqui es la primera, y se hace para que no envíe correo si la compra es superior al dinero que tenga el usuario.
+                    utils.validate_balance(data.message.user_id,function (response_validate_balance) {
+                        if(response_validate_balance.status == 200) {
+                            return callback({
+                                'message': "El saldo que tiene en éste momento es de $" + response_validate_balance.message,
+                                'status': 200
+                            });
+                        }else {
+                            return callback({
+                                'message': "En este momento no se puede consultar el saldo.",
+                                'status': 200
+                            });
+                        }
+                    });
+                }else {
+                    return callback({
+                        'message': data.message,
+                        'status': 200
+                    });
+                }
+            });
+        } else {
+            return callback({
+                'message': result.errors.errors,
+                'status': 200
+            });
+        }
     }
 };

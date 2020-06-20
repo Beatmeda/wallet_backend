@@ -8,8 +8,8 @@ env(__dirname + '/.env');
 app.use(cors());
 app.use(bodyParser.json());
 
-require("./routes/pages")(app);
 require("./routes/apis/register")(app);
 require("./routes/apis/transactions")(app);
+require("./routes/pages")(app);
 
 app.listen(process.env.PORT || 5000);

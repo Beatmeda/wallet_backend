@@ -12,9 +12,14 @@ module.exports = function(app) {
             res.json(data);
         });
     });
-    app.get(`${API_BASE}/confirmation_purchase/:token`, (req, res) => {
-        transactions_controller.confirmationPurchase(req, function(data) {
+    app.post(`${API_BASE}/get_balance`, (req, res) => {
+        transactions_controller.getBalance(req.body, function(data) {
             res.json(data);
         });
     });
+    /*app.get(`${API_BASE}/confirmation_purchase/:token`, (req, res) => {
+        transactions_controller.confirmationPurchase(req, function(data) {
+            res.json(data);
+        });
+    });*/
 };

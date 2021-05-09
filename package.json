@@ -21,7 +21,7 @@
     "cors": "^2.8.5",
     "email-templates": "^2.7.1",
     "express": "^4.17.1",
-    "handlebars": "^4.7.6",
+    "handlebars": "^4.7.7",
     "mysql": "^2.18.1",
     "node-env-file": "^0.1.8",
     "nodemailer": "^6.4.6",

@@ -24,7 +24,7 @@
     "handlebars": "^4.7.6",
     "mysql": "^2.18.1",
     "node-env-file": "^0.1.8",
-    "nodemailer": "^6.4.6",
+    "nodemailer": "^6.4.16",
     "path": "^0.12.7",
     "request": "^2.88.2",
     "validatorjs": "^3.18.1"
